@@ -1,8 +1,9 @@
-import 'package:challenges/Widgets/grocery_list.dart';
+// ignore_for_file: camel_case_types, non_constant_identifier_names
+import 'dart:convert';
 import 'package:challenges/data/data.dart';
 import 'package:challenges/models/category.dart';
-import 'package:challenges/models/grocery_item.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class new_item extends StatefulWidget {
   const new_item({super.key});
@@ -20,11 +21,22 @@ class _new_itemState extends State<new_item> {
   void _saveItem() {
     if (_FormKey.currentState!.validate()) {
       _FormKey.currentState!.save();
-      Navigator.of(context).pop(GroceryItem(
-          id: DateTime.now().toString(),
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory));
+      final url = Uri.https('flutterprep-ebc4e-default-rtdb.firebaseio.com',
+          'Shopping-list.json');
+      http.post(url,
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'name': _enteredName,
+            'quantity': _enteredQuantity,
+            'category': _selectedCategory.title,
+          }));
+      Navigator.of(context).pop;
+      // (GroceryItem(
+      //     id: DateTime.now().toString(),
+      //     name: _enteredName,
+      //     quantity: _enteredQuantity,
+      //     category: _selectedCategory)
+      //     );
     }
   }
 
