@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:convert';
 
 import 'package:challenges/Widgets/new_item.dart';
@@ -16,12 +18,7 @@ class Grocerylist extends StatefulWidget {
 
 class _GrocerylistState extends State<Grocerylist> {
   List<GroceryItem> _groceryItems = [];
-
-  void removeItem(GroceryItem item) {
-    setState(() {
-      _groceryItems.remove(item);
-    });
-  }
+  var isloading = true;
 
   @override
   void initState() {
@@ -33,8 +30,11 @@ class _GrocerylistState extends State<Grocerylist> {
     final url = Uri.https(
         'flutterprep-ebc4e-default-rtdb.firebaseio.com', 'Shopping-list.json');
     final response = await http.get(url);
+
     final Map<String, dynamic> Listdata = json.decode(response.body);
+
     final List<GroceryItem> Loadeditems = [];
+
     for (final item in Listdata.entries) {
       final category = categories.entries
           .firstWhere(
@@ -48,6 +48,7 @@ class _GrocerylistState extends State<Grocerylist> {
             category: category),
       );
       setState(() {
+        isloading = false;
         _groceryItems = Loadeditems;
       });
     }
@@ -67,45 +68,56 @@ class _GrocerylistState extends State<Grocerylist> {
 
   @override
   Widget build(BuildContext context) {
+    Widget content = const Center(
+      child: Text('No Groceries found'),
+    );
+    if (isloading) {
+      content = const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    if (_groceryItems.isNotEmpty) {
+      content = ListView.builder(
+        itemCount: _groceryItems.length,
+        itemBuilder: (context, index) {
+          {
+            return Dismissible(
+              onDismissed: (direction) {
+                // removeItem(_groceryItems[index]);
+              },
+              key: ValueKey(_groceryItems[index].id),
+              child: ListTile(
+                title: Text(_groceryItems[index].name),
+                leading: Container(
+                  width: 50,
+                  height: 50,
+                  color: _groceryItems[index].category.color,
+                ),
+                trailing: Text(groceryItems[index].quantity.toString()),
+              ),
+            );
+          }
+        },
+      );
+    } else {
+      content;
+    }
+
     return Scaffold(
-        appBar: AppBar(
-          centerTitle: false,
-          title: const Text(
-            'Your Groceries',
-          ),
-          actions: [
-            IconButton.filled(
-              color: Colors.black,
-              onPressed: _addItem,
-              icon: const Icon(Icons.add),
-            )
-          ],
+      appBar: AppBar(
+        centerTitle: false,
+        title: const Text(
+          'Your Groceries',
         ),
-        body: _groceryItems.isEmpty
-            ? const Center(
-                child: Text('No Groceries found'),
-              )
-            : ListView.builder(
-                itemCount: _groceryItems.length,
-                itemBuilder: (context, index) {
-                  {
-                    return Dismissible(
-                      onDismissed: (direction) {
-                        removeItem(_groceryItems[index]);
-                      },
-                      key: ValueKey(_groceryItems[index].id),
-                      child: ListTile(
-                        title: Text(_groceryItems[index].name),
-                        leading: Container(
-                          width: 50,
-                          height: 50,
-                          color: _groceryItems[index].category.color,
-                        ),
-                        trailing: Text(groceryItems[index].quantity.toString()),
-                      ),
-                    );
-                  }
-                },
-              ));
+        actions: [
+          IconButton.filled(
+            color: Colors.black,
+            onPressed: _addItem,
+            icon: const Icon(Icons.add),
+          )
+        ],
+      ),
+      body: content,
+    );
   }
 }
