@@ -31,10 +31,6 @@ class _new_itemState extends State<new_item> {
             'category': _selectedCategory.title,
           }));
 
-      print(response.body);
-
-      print(response.statusCode);
-
       if (!context.mounted) {
         return;
       }
