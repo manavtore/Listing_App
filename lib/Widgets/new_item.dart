@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:challenges/data/data.dart';
 import 'package:challenges/models/category.dart';
+import 'package:challenges/models/grocery_item.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -31,10 +32,16 @@ class _new_itemState extends State<new_item> {
             'category': _selectedCategory.title,
           }));
 
+      final resdata = jsonDecode(response.body);
+
       if (!context.mounted) {
         return;
       }
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(GroceryItem(
+          id: resdata['name'],
+          name: _enteredName,
+          quantity: _enteredQuantity,
+          category: _selectedCategory));
     }
   }
 
