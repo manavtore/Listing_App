@@ -141,12 +141,21 @@ class _GrocerylistState extends State<Grocerylist> {
   }
 
   void removeItem(GroceryItem item) async {
-    final url = Uri.https('flutterprep-ebc4e-default-rtdb.firebaseio.com',
-        'Shopping-list/${item.id}.json');
+    final index = groceryItems.indexOf(item);
 
-    http.delete(url);
     setState(() {
       _groceryItems.remove(item);
     });
+
+    final url = Uri.https('flutterprep-ebc4e-default-rtdb.firebaseio.com',
+        'Shopping-list/${item.id}.json');
+
+    final response = await http.delete(url);
+
+    if (response.statusCode >= 400) {
+      setState(() {
+        _groceryItems.insert(index, item);
+      });
+    }
   }
 }
