@@ -69,6 +69,16 @@ class _GrocerylistState extends State<Grocerylist> {
     setState(() {
       _groceryItems.add(NewItem);
     });
+
+    void removeItem(GroceryItem item) async {
+      final url = Uri.https('flutterprep-ebc4e-default-rtdb.firebaseio.com',
+          'Shopping-list/${item.id}.json');
+
+      http.delete(url);
+      setState(() {
+        _groceryItems.remove(item);
+      });
+    }
   }
 
   @override
@@ -88,7 +98,7 @@ class _GrocerylistState extends State<Grocerylist> {
           {
             return Dismissible(
               onDismissed: (direction) {
-                // removeItem(_groceryItems[index]);
+                removeItem(_groceryItems[index]);
               },
               key: ValueKey(_groceryItems[index].id),
               child: ListTile(
@@ -128,5 +138,15 @@ class _GrocerylistState extends State<Grocerylist> {
       ),
       body: content,
     );
+  }
+
+  void removeItem(GroceryItem item) async {
+    final url = Uri.https('flutterprep-ebc4e-default-rtdb.firebaseio.com',
+        'Shopping-list/${item.id}.json');
+
+    http.delete(url);
+    setState(() {
+      _groceryItems.remove(item);
+    });
   }
 }
