@@ -30,38 +30,43 @@ class _GrocerylistState extends State<Grocerylist> {
   void Loaditem() async {
     final url = Uri.https(
         'flutterprep-ebc4e-default-rtdb.firebaseio.com', 'Shopping-list.json');
-    final response = await http.get(url);
-    if (response.statusCode >= 400) {
-      setState(() {
-        error = "Failed to fetch the data plz try after sometime";
-      });
-      return;
-    }
 
-    if (response.body == 'null') {
-      setState(() {
-        isloading = false;
-      });
-    }
-    final Map<String, dynamic> Listdata = json.decode(response.body);
+    try {
+      final response = await http.get(url);
 
-    final List<GroceryItem> Loadeditems = [];
+      if (response.statusCode >= 400) {
+        return;
+      }
 
-    for (final item in Listdata.entries) {
-      final category = categories.entries
-          .firstWhere(
-              (CatItem) => CatItem.value.title == item.value['category'])
-          .value;
-      Loadeditems.add(
-        GroceryItem(
-            id: item.key,
-            name: item.value['name'],
-            quantity: item.value['quantity'],
-            category: category),
-      );
+      if (response.body == 'null') {
+        setState(() {
+          isloading = false;
+        });
+      }
+      final Map<String, dynamic> Listdata = json.decode(response.body);
+
+      final List<GroceryItem> Loadeditems = [];
+
+      for (final item in Listdata.entries) {
+        final category = categories.entries
+            .firstWhere(
+                (CatItem) => CatItem.value.title == item.value['category'])
+            .value;
+        Loadeditems.add(
+          GroceryItem(
+              id: item.key,
+              name: item.value['name'],
+              quantity: item.value['quantity'],
+              category: category),
+        );
+        setState(() {
+          isloading = false;
+          _groceryItems = Loadeditems;
+        });
+      }
+    } catch (e) {
       setState(() {
-        isloading = false;
-        _groceryItems = Loadeditems;
+        error = "Sommething went wrong! data plz try after sometime";
       });
     }
   }
